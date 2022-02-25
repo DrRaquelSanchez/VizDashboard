@@ -1,0 +1,48 @@
+---
+title: "AssBivWorldDash"
+output: html_notebook
+---
+
+
+
+```{r}
+src='https://github.com/DrRaquelSanchez/WACountyCaBurden/raw/0693cdba7c11e25177ce422612a6a79469fd4a0d/CtyComNCD30Dash1.csv'
+
+CtyComNCD30Dash1=read.csv(src)
+```
+
+```{r}
+library(ggplot2)
+base=ggplot(data=CtyComNCD30Dash1,
+            aes(x=Country,y=value))
+
+base + geom_boxplot()
+```
+```{r}
+baseYear=ggplot(data=CtyComNCD30Dash1,
+            aes(x=Country,
+                y=value)) 
+boxYear=baseYear + geom_boxplot() + labs(title = "")
+# flipping
+boxYear  + coord_flip()
+```
+```{r}
+CtyComNCD30Dash1$value=CtyComNCD30Dash1$value*100
+
+plot4 = plot3 + scale_y_continuous(breaks=c(0,10, 25,40),
+                                   limits = c(0, 40), 
+                                   labels=unit_format(suffix = '%')) 
+
+
+
+baseYear=ggplot(data=CtyComNCD30Dash1,
+            aes(x=reorder(Country,
+                          value,
+                          median),
+                y=value)) 
+boxYear=baseYear + geom_boxplot(color="blue",outlier.color="black") + labs(title = "Total % Burden of Disease for Top 30 Countries ") + scale_y_continuous(breaks=c(5,15,25,35,45,55),limits=c(5,55),labels=unit_format(suffix="%"))
+
+
+boxYear  + coord_flip() + labs(x="Country",y="DALY") + labs(caption="Source:World Health Organization") 
+```
+
