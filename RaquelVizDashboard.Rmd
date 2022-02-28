@@ -1,0 +1,115 @@
+---
+title: "Raquel Viz Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+
+library(ggplot2)
+src='https://github.com/DrRaquelSanchez/VizDashboard/raw/main/CtyCommBdn30dash.csv'
+CtyCommBdn30dash=read.csv(src)
+
+
+```
+
+Row {data-height=800}
+-----------------------------------------------------------------------
+
+### BAR GRAPH
+
+```{r}
+library(ggplot2)
+CtyCommBdn30dash=CtyCommBdn30dash[order(CtyCommBdn30dash$DALY),]
+
+base= ggplot(data = CtyCommBdn30dash, 
+             aes(x = Communicable_Disease,y = DALY)) 
+
+base= base + scale_x_discrete(limits=CtyCommBdn30dash[order(CtyCommBdn30dash$DALY),'Communicable_Disease']) 
+base= base + theme_classic()
+
+bar1=base+geom_bar(fill="blue", stat = "identity")
+
+LABELS=paste0(round(CtyCommBdn30dash$DALY,2))
+
+titleText1='Global DALY Scores of Top Communicable Diseases'
+sourceText1='Source: World Health Organization'
+
+bar2=bar1 + labs(title=titleText1,
+                     x ="Communicable_Disease", 
+                     y = "DALY",
+                     caption = sourceText1,
+                      label = LABELS) + 
+  scale_y_continuous(breaks=c(0.0,0.25,0.5,0.75,1.0, 1.25, 1.5, 1.75),
+                                   limits = c(0,1.75))
+
+LABELS=paste0(round(CtyCommBdn30dash$DALY,2))
+bar3 = bar2 + geom_text(vjust=-0.5, 
+                          size = 5,
+                          aes(x= Communicable_Disease, y = DALY ,
+                              label = LABELS))
+
+
+bar3
+
+```
+
+
+
+
+### BOXPLOT
+
+```{r}
+src='https://github.com/DrRaquelSanchez/VizDashboard/raw/main/CtyComNCD30Dash1.csv'
+
+CtyComNCD30Dash1=read.csv(src)
+
+
+library(ggplot2)
+library(scales)
+
+base=ggplot(data=CtyComNCD30Dash1,
+            aes(x=Country,y=value))
+
+CtyComNCD30Dash1$value=CtyComNCD30Dash1$value*100
+
+baseYear=ggplot(data=CtyComNCD30Dash1,
+            aes(x=reorder(Country,
+                          value,
+                          median),
+                y=value)) 
+boxYear=baseYear + geom_boxplot(color="blue",outlier.color="black") + labs(title = "Total % Burden Disease for Top 30 Countries ") + scale_y_continuous(breaks=c(5,15,25,35,45,55),limits=c(5,55),labels=unit_format(suffix="%"))
+
+
+boxYear  + coord_flip() + labs(x="Country",y="DALY") + labs(caption="Source:World Health Organization")
+
+```
+
+
+Row {data-height=900}
+-----------------------------------------------------------------------
+### MAP
+
+```{r}
+
+library(ggplot2)
+src='https://github.com/DrRaquelSanchez/VizDashboard/raw/main/CtyBdn30.csv'
+CtyBdn30=read.csv(src)
+
+linkMap="https://github.com/EvansDataScience/VAforPM_Spatial/raw/main/worldMap.geojson"
+library(sf)
+mapWorld=read_sf(linkMap)
+CtyBdn30Map=merge(mapWorld, 
+                   CtyBdn30, 
+                   by.x='NAME',by.y='Country') 
+base=ggplot(data=mapWorld) + geom_sf(fill='grey90',
+                                     color=NA) + theme_classic()
+colMap= base + geom_sf(data=CtyBdn30Map,
+                       color='blue', fill = 'pink')
+colMap + labs(title="Concentration of 30 Countries with Highest Burden of Disease") + labs(caption="source: World Health Organization")
+```
+
+
